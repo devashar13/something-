@@ -10,7 +10,8 @@ function MainScreen() {
   const [selectedActivityDescription, setSelectedActivityDescription] =
     useState("");
   const [selectedActivityCode, setSelectedActivityCode] = useState("");
-  const [selectedActivityStatus, setSelectedActivityStatus] = useState("true");
+  const [selectedBoxes, setSelectedBoxes] = useState([]);
+  const [selectedActivityStatus, setSelectedActivityStatus] = useState(true);
 
   // Pass data from table to modal
   const handleDataShow = (
@@ -20,7 +21,7 @@ function MainScreen() {
     activityStatus,
     index
   ) => {
-    console.log(activityCode);
+    console.log(index);
     setSelectedIndex(index);
     setSelectedActivityName(activityName);
     setSelectedActivityDescription(activityDescription);
@@ -49,12 +50,22 @@ function MainScreen() {
       activitiesList.push(formDataObj);
       setActivities(activitiesList);
     } else {
+      console.log(formDataObj);
+      formDataObj.enabled = (formDataObj.enabled === "true") ? true : false;
+      console.log(formDataObj);
       activities[indexValue] = formDataObj;
       setActivities(activities);
     }
     handleClose();
   };
 
+  const handleCheckboxChange = (e) => {
+    if(e.target.checked ){
+      console.log(e.target.id);
+      setSelectedBoxes(selectedBoxes.push(e.target.id));
+    }
+    console.log(selectedBoxes)
+  }
   return (
     <div>
       <div className="container buttonContainer mt-3 mb-3">
@@ -66,7 +77,7 @@ function MainScreen() {
         <Table striped bordered hover className="table">
           <thead>
             <tr className="table-head">
-              <th>#</th>
+              <th></th>
               <th>Name</th>
               <th>Code</th>
               <th>Desciption</th>
@@ -77,7 +88,10 @@ function MainScreen() {
             {activities.map((activity, index) => {
               return (
                 <tr key={index}>
-                  <td>{index + 1}</td>
+                  <td>
+                    <input id = { activity.id} onChange={handleCheckboxChange} type="checkbox" />
+                  </td>
+                  
                   <td>
                     <Button
                     variant="link"
@@ -86,7 +100,7 @@ function MainScreen() {
                           activity.name,
                           activity.description,
                           activity.code,
-                          activity.status,
+                          activity.enabled,
                           index
                         );
                       }}
@@ -161,13 +175,13 @@ function MainScreen() {
                 />
               </Col>
             </Form.Group>
-            <Form.Group as={Row} className="mb-3" controlId="status">
+            <Form.Group as={Row} className="mb-3" controlId="enabled">
               <Form.Label column sm="2">
                 Status
               </Form.Label>
               <Col sm="10">
                 <Form.Select
-                  name="status"
+                  name="enabled"
                   aria-label="Status"
                   defaultValue={
                     selectedActivityStatus != "" ? selectedActivityStatus : true
