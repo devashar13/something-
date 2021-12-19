@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button, Col, Form, Modal, Row, Table } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import activitiesList from "../../data/dummyData";
@@ -10,7 +10,7 @@ function MainScreen() {
   const [selectedActivityDescription, setSelectedActivityDescription] =
     useState("");
   const [selectedActivityCode, setSelectedActivityCode] = useState("");
-  const [selectedBoxes, setSelectedBoxes] = useState([]);
+  const selectedBoxes = useRef([]);
   const [selectedActivityStatus, setSelectedActivityStatus] = useState(true);
 
   // Pass data from table to modal
@@ -40,8 +40,8 @@ function MainScreen() {
   };
   const handleShow = () => setShow(true);
   useEffect(() => {
-    console.log(activitiesList);
-  }, [activities]);
+    console.log("activities");
+            }, [activities]);
   const onFormSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData(e.target),
@@ -51,7 +51,7 @@ function MainScreen() {
       setActivities(activitiesList);
     } else {
       console.log(formDataObj);
-      formDataObj.enabled = (formDataObj.enabled === "true") ? true : false;
+      formDataObj.enabled = formDataObj.enabled === "true" ? true : false;
       console.log(formDataObj);
       activities[indexValue] = formDataObj;
       setActivities(activities);
@@ -60,17 +60,37 @@ function MainScreen() {
   };
 
   const handleCheckboxChange = (e) => {
-    if(e.target.checked ){
+    if (e.target.checked) {
       console.log(e.target.id);
-      setSelectedBoxes(selectedBoxes.push(e.target.id));
+      const arr = [...selectedBoxes.current, e.target.id];
+      console.log(arr);
+      selectedBoxes.current = arr;
+    } else {
+      selectedBoxes.current = selectedBoxes.current.filter(
+        (item) => item !== e.target.id
+      );
+      console.log(selectedBoxes.current);
     }
-    console.log(selectedBoxes)
-  }
+  };
+    const handleDelete = () => {
+      console.log(selectedBoxes.current);
+      const ac = activities
+      selectedBoxes.current.forEach((item) => {
+        ac.splice(Number(item), 1);
+      });
+      console.log(ac)
+      setActivities(ac);
+      console.log(activities);
+
+    };
   return (
     <div>
       <div className="container buttonContainer mt-3 mb-3">
         <Button variant="primary" onClick={handleShow}>
           Add Activity
+        </Button>
+        <Button variant="light" onClick={handleDelete}>
+          Delete
         </Button>
       </div>
       <div className="container">
@@ -89,12 +109,16 @@ function MainScreen() {
               return (
                 <tr key={index}>
                   <td>
-                    <input id = { activity.id} onChange={handleCheckboxChange} type="checkbox" />
+                    <input
+                      id={activity.id}
+                      onChange={handleCheckboxChange}
+                      type="checkbox"
+                    />
                   </td>
-                  
+
                   <td>
                     <Button
-                    variant="link"
+                      variant="link"
                       onClick={() => {
                         handleDataShow(
                           activity.name,
